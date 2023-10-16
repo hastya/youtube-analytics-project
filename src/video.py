@@ -4,15 +4,9 @@ import os
 from googleapiclient.discovery import build
 
 
-# from googleapiclient.errors import HttpError
-
-class HttpError(Exception):
-    pass
-
-
 class Video:
     """Класс для ютуб-канала"""
-    api_key: str = os.getenv('YouTube API')
+    api_key: str = os.getenv('YT_API_KEY')
     youtube = build('youtube', 'v3', developerKey=api_key)
 
     def __init__(self, video_id: str):
@@ -23,7 +17,8 @@ class Video:
             self.video_link = f'https://www.youtube.com/watch?v={self.video_id}'
             self.video_views = self.video_info["items"][0]["statistics"]["viewCount"]
             self.video_likes = self.video_info["items"][0]["statistics"]["likeCount"]
-        except HttpError:
+        except IndexError:
+            self.video_id = video_id
             self.video_info = None
             self.video_name = None
             self.video_link = None
@@ -40,7 +35,7 @@ class Video:
                                                     id=self.video_id
                                                     ).execute()
         if len(video_response['items']) == 0:
-            raise HttpError
+            raise IndexError
         else:
             return video_response
 
